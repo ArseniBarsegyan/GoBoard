@@ -4,6 +4,7 @@ using UnityEngine;
 public class Mover : MonoBehaviour
 {
     protected Board m_board;
+    protected Node m_currentNode;
 
     public Vector3 destination;
     public bool isMoving = false;
@@ -18,17 +19,30 @@ public class Mover : MonoBehaviour
 
     protected virtual void Start()
     {
+        UpdateCurrentNode();
     }
 
     public void Move(Vector3 destinationPos, float delayTime = 0.25f)
     {
+        if (isMoving)
+        {
+            return;
+        }
+
         if (m_board != null)
         {
             Node targetNode = m_board.FindNodeAt(destinationPos);
 
-            if (targetNode != null && m_board.PlayerNode.LinkedNodes.Contains(targetNode))
+            if (targetNode != null && m_currentNode != null)
             {
-                StartCoroutine(MoveRoutine(destinationPos, delayTime));
+                if (m_currentNode.LinkedNodes.Contains(targetNode))
+                {
+                    StartCoroutine(MoveRoutine(destinationPos, delayTime));
+                }
+                else
+                {
+                    Debug.Log($"MOVER: {m_currentNode.name} not connected {targetNode.name}");
+                }
             }
         }
     }
@@ -57,6 +71,8 @@ public class Mover : MonoBehaviour
         iTween.Stop(gameObject);
         transform.position = destinationPos;
         isMoving = false;
+
+        UpdateCurrentNode();
     }
 
     public void MoveLeft()
@@ -81,5 +97,13 @@ public class Mover : MonoBehaviour
     {
         Vector3 newPosition = transform.position + new Vector3(0f, 0f, -Board.spacing);
         Move(newPosition, 0);
+    }
+
+    protected void UpdateCurrentNode()
+    {
+        if (m_board != null)
+        {
+            m_currentNode = m_board.FindNodeAt(transform.position);
+        }
     }
 }
