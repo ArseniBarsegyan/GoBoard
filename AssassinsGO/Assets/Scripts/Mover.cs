@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+
 using UnityEngine;
 
 public class Mover : MonoBehaviour
@@ -7,9 +8,11 @@ public class Mover : MonoBehaviour
     protected Node m_currentNode;
 
     public Vector3 destination;
+    public bool faceDestination = false;
     public bool isMoving = false;
     public iTween.EaseType easeType = iTween.EaseType.easeInOutExpo;
     public float moveSpeed = 1.5f;
+    public float rotateTime = 0.5f;
     public float iTweenDelay = 0f;
 
     protected virtual void Awake()
@@ -52,6 +55,11 @@ public class Mover : MonoBehaviour
         isMoving = true;
         destination = destinationPos;
 
+        if (faceDestination)
+        {
+            FaceDestination();
+            yield return new WaitForSeconds(0.5f);
+        }
         yield return new WaitForSeconds(delayTime);
 
         iTween.MoveTo(gameObject, iTween.Hash(
@@ -105,5 +113,19 @@ public class Mover : MonoBehaviour
         {
             m_currentNode = m_board.FindNodeAt(transform.position);
         }
+    }
+
+    void FaceDestination()
+    {
+        Vector3 relativePosition = destination - transform.position;
+        Quaternion newRotation = Quaternion.LookRotation(relativePosition, Vector3.up);
+
+        float newY = newRotation.eulerAngles.y;
+        iTween.RotateTo(gameObject, iTween.Hash(            
+            "y", newY,
+            "delay", 0f,
+            "easetype", easeType,
+            "time", rotateTime
+        ));
     }
 }

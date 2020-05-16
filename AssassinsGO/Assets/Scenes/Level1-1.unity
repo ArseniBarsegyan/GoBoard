@@ -734,6 +734,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6b62d17e55c0fe44a94233b8bc39287, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destination: {x: 0, y: 0, z: 0}
+  faceDestination: 1
+  isMoving: 0
+  easeType: 17
+  moveSpeed: 1.5
+  rotateTime: 0.5
+  iTweenDelay: 0
 --- !u!1 &209511135
 GameObject:
   m_ObjectHideFlags: 0
@@ -7874,9 +7881,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   destination: {x: 0, y: 0, z: 0}
+  faceDestination: 0
   isMoving: 0
   easeType: 10
   moveSpeed: 2
+  rotateTime: 0.5
   iTweenDelay: 0
 --- !u!4 &1685212619
 Transform:
