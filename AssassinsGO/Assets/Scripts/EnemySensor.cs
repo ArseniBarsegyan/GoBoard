@@ -32,8 +32,8 @@ public class EnemySensor : MonoBehaviour
         }
     }
 
-    void Update()
-    {
-        UpdateSensor();
-    }
+    //void Update()
+    //{
+    //    UpdateSensor();
+    //}
 }
