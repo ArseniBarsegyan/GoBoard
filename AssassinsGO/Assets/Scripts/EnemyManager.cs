@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+
+using UnityEngine;
 
 [RequireComponent(typeof(EnemyMover))]
 [RequireComponent(typeof(EnemySensor))]
@@ -19,5 +21,21 @@ public class EnemyManager : TurnManager
 
     void Update()
     {
+    }
+
+    public void PlayTurn()
+    {
+        StartCoroutine(PlayTurnRoutine());
+    }
+
+    IEnumerator PlayTurnRoutine()
+    {
+        m_enemySensor.UpdateSensor();
+
+        // attack player
+        // movement in EnemyMover
+        yield return new WaitForSeconds(0.5f);
+
+        m_enemyMover.MoveOneTurn();
     }
 }

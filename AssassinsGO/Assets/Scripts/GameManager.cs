@@ -1,37 +1,32 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 
+[System.Serializable]
+public enum Turn 
+{
+    Player,
+    Enemy
+}
+
 public class GameManager : MonoBehaviour
 {
-    // reference to the GameBoard
     Board m_board;
-
-    // reference to PlayerManager
     PlayerManager m_player;
+    List<EnemyManager> m_enemies;
 
-    // has the user pressed start?
-    bool m_hasLevelStarted = false;
-    public bool HasLevelStarted { get { return m_hasLevelStarted; } set { m_hasLevelStarted = value; } }
+    public Turn CurrentTurn { get; private set; } = Turn.Player;
+    public bool HasLevelStarted { get; set; } = false;
+    public bool IsGamePlaying { get; set; } = false;
+    public bool IsGameOver { get; set; } = false;
+    public bool HasLevelFinished { get; set; } = false;
 
-    // have we begun gamePlay?
-    bool m_isGamePlaying = false;
-    public bool IsGamePlaying { get { return m_isGamePlaying; } set { m_isGamePlaying = value; } }
-
-    // have we met the game over condition?
-    bool m_isGameOver = false;
-    public bool IsGameOver { get { return m_isGameOver; } set { m_isGameOver = value; } }
-
-    // have the end level graphics finished playing?
-    bool m_hasLevelFinished = false;
-    public bool HasLevelFinished { get { return m_hasLevelFinished; } set { m_hasLevelFinished = value; } }
-
-    // delay in between game stages
     public float delay = 1f;
 
-    // events invoked for StartLevel/PlayLevel/EndLevel coroutines
     public UnityEvent setupEvent;
     public UnityEvent startLevelEvent;
     public UnityEvent playLevelEvent;
@@ -39,14 +34,14 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        // populate Board and PlayerManager components
-        m_board = Object.FindObjectOfType<Board>().GetComponent<Board>();
-        m_player = Object.FindObjectOfType<PlayerManager>().GetComponent<PlayerManager>();
+        m_board = FindObjectOfType<Board>().GetComponent<Board>();
+        m_player = FindObjectOfType<PlayerManager>().GetComponent<PlayerManager>();
+        var enemies = FindObjectsOfType<EnemyManager>() as EnemyManager[];
+        m_enemies = enemies.ToList();
     }
 
     void Start()
     {
-        // start the main game loop if the PlayerManager and Board are present
         if (m_player != null && m_board != null)
         {
             StartCoroutine("RunGameLoop");
@@ -57,7 +52,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // run the main game loop, separated into different stages/coroutines
     IEnumerator RunGameLoop()
     {
         yield return StartCoroutine("StartLevelRoutine");
@@ -65,7 +59,6 @@ public class GameManager : MonoBehaviour
         yield return StartCoroutine("EndLevelRoutine");
     }
 
-    // the initial stage after the level is loaded
     IEnumerator StartLevelRoutine()
     {
         Debug.Log("SETUP LEVEL");
@@ -76,87 +69,65 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("START LEVEL");
         m_player.playerInput.InputEnabled = false;
-        while (!m_hasLevelStarted)
+        while (!HasLevelStarted)
         {
-            //show start screen
-            // user presses button to start
-            // HasLevelStarted = true
             yield return null;
         }
 
-        // trigger events when we press the StartButton
         if (startLevelEvent != null)
         {
             startLevelEvent.Invoke();
         }
     }
 
-    // gameplay stage
     IEnumerator PlayLevelRoutine()
     {
         Debug.Log("PLAY LEVEL");
-        m_isGamePlaying = true;
+        IsGamePlaying = true;
         yield return new WaitForSeconds(delay);
         m_player.playerInput.InputEnabled = true;
 
-        // trigger any events as we start playing the level
         if (playLevelEvent != null)
         {
             playLevelEvent.Invoke();
         }
 
-        while (!m_isGameOver)
+        while (!IsGameOver)
         {
-        	// pause one frame
 			yield return null;
-
-            // check for level win condition
-             m_isGameOver = IsWinner();
-
-			// check for the lose condition
+             IsGameOver = IsWinner();
         }
-        // Debug.Log("WIN! ==========================");
     }
 
-    // end stage after gameplay is complete
     IEnumerator EndLevelRoutine()
     {
         Debug.Log("END LEVEL");
         m_player.playerInput.InputEnabled = false;
 
-        // run events when we end the level
         if (endLevelEvent != null)
         {
             endLevelEvent.Invoke();
         }
 
-        // show end screen
-        while (!m_hasLevelFinished)
+        while (!HasLevelFinished)
         {
-            // user presses button to continue
-
-            // HasLevelFinished = true
             yield return null;
         }
 
-        // reload the current scene
         RestartLevel();
     }
 
-    // restart the current level
     void RestartLevel()
     {
         Scene scene = SceneManager.GetActiveScene();
         SceneManager.LoadScene(scene.name);
     }
 
-    // attach to StartButton, triggers PlayLevelRoutine
     public void PlayLevel()
     {
-        m_hasLevelStarted = true;
+        HasLevelStarted = true;
     }
 
-    // has the player reached the goal node?
     bool IsWinner()
     {
         if (m_board.PlayerNode != null)
@@ -166,4 +137,53 @@ public class GameManager : MonoBehaviour
         return false;
     }
 
+    void PlayPlayerTurn()
+    {
+        CurrentTurn = Turn.Player;
+        m_player.IsTurnComplete = false;
+    }
+
+    void PlayEnemyTurn()
+    {
+        CurrentTurn = Turn.Enemy;
+
+        foreach(var enemy in m_enemies)
+        {
+            if (enemy != null)
+            {
+                enemy.IsTurnComplete = false;
+                enemy.PlayTurn();
+            }
+        }
+    }
+
+    bool IsEnemyTurnComplete()
+    {
+        foreach(var enemy in m_enemies)
+        {
+            if (!enemy.IsTurnComplete)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void UpdateTurn()
+    {
+        if (CurrentTurn == Turn.Player && m_player != null)
+        {
+            if (m_player.IsTurnComplete)
+            {
+                PlayEnemyTurn();
+            }
+        }
+        else if (CurrentTurn == Turn.Enemy)
+        {
+            if (IsEnemyTurnComplete())
+            {
+                PlayPlayerTurn();
+            }            
+        }
+    }
 }

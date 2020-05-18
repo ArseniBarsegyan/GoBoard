@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class TurnManager : MonoBehaviour
 {
@@ -16,6 +14,9 @@ public class TurnManager : MonoBehaviour
     {
         IsTurnComplete = true;
         
-        // Update the game manager
+        if (m_gameManager != null)
+        {
+            m_gameManager.UpdateTurn();
+        }
     }
 }

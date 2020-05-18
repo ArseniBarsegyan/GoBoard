@@ -1,12 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(PlayerMover))]
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerManager : TurnManager
 {
-	// reference to PlayerMover and PlayerInput components
 	public PlayerMover playerMover;
     public PlayerInput playerInput;
 
@@ -14,26 +11,21 @@ public class PlayerManager : TurnManager
     {
         base.Awake();
 
-		// cache references to PlayerMover and PlayerInput
 		playerMover = GetComponent<PlayerMover>();
         playerInput = GetComponent<PlayerInput>();
 
-		// make sure that input is enabled when we begin
 		playerInput.InputEnabled = true;
     }
 
     void Update()
     {
-		// if the player is currently moving, ignore user input
-		if (playerMover.isMoving)
+		if (playerMover.isMoving || m_gameManager.CurrentTurn != Turn.Player)
         {
             return;
         }
 
-		// get keyboard input
 		playerInput.GetKeyInput();
 
-		// connect user input with PlayerMover's Move methods
 		if (playerInput.V == 0)
         {
             if (playerInput.H < 0)

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+
 using UnityEngine;
 
 public class PlayerMover : Mover
@@ -8,7 +9,7 @@ public class PlayerMover : Mover
     protected override void Awake()
     {
         base.Awake();
-        m_playerCompass = Object.FindObjectOfType<PlayerCompass>().GetComponent<PlayerCompass>();
+        m_playerCompass = FindObjectOfType<PlayerCompass>().GetComponent<PlayerCompass>();
     }
 
     protected override void Start()
@@ -32,6 +33,8 @@ public class PlayerMover : Mover
         {
             m_playerCompass.ShowArrows(true);
         }
+
+        finishMovementEvent.Invoke();
     }
 
     void UpdateBoard()

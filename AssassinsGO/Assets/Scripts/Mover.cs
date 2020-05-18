@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Mover : MonoBehaviour
 {
@@ -15,9 +16,11 @@ public class Mover : MonoBehaviour
     public float rotateTime = 0.5f;
     public float iTweenDelay = 0f;
 
+    public UnityEvent finishMovementEvent;
+
     protected virtual void Awake()
     {
-        m_board = Object.FindObjectOfType<Board>().GetComponent<Board>();
+        m_board = FindObjectOfType<Board>().GetComponent<Board>();
     }
 
     protected virtual void Start()
