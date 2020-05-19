@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 5621160355707051672}
   - component: {fileID: 5621160355707051673}
   m_Layer: 0
-  m_Name: EnemyGuard
+  m_Name: EnemyStationary
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -112,8 +112,8 @@ MonoBehaviour:
   destination: {x: 0, y: 0, z: 0}
   faceDestination: 1
   isMoving: 0
-  easeType: 17
-  moveSpeed: 1.5
+  easeType: 10
+  moveSpeed: 3
   rotateTime: 0.5
   iTweenDelay: 0
   finishMovementEvent:
@@ -132,6 +132,9 @@ MonoBehaviour:
         m_CallState: 2
     m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  directionToMove: {x: 0, y: 0, z: 2}
+  movementType: 0
+  StandTime: 2
 --- !u!114 &5621160355707051673
 MonoBehaviour:
   m_ObjectHideFlags: 0
