@@ -127,6 +127,7 @@ public class GameManager : MonoBehaviour
     {
         IsGameOver = true;
 
+        yield return new WaitForSeconds(1.5f);
         if (loseLevelEvent != null)
         {
             loseLevelEvent.Invoke();
