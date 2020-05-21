@@ -14,19 +14,18 @@ public class Board : MonoBehaviour
         new Vector2(0f, -spacing)
     };
 
-    List<Node> m_allNodes = new List<Node>();
-    public List<Node> AllNodes => m_allNodes;
-
-    Node m_playerNode;
-    public Node PlayerNode => m_playerNode;
-
-    Node m_goalNode;
-    public Node GoalNode => m_goalNode;
+    public List<Node> AllNodes { get; private set; } = new List<Node>();
+    public List<Transform> capturePositions;
+    public Node PlayerNode { get; private set; }
+    public Node GoalNode { get; private set; }    
+    public int CurrentCapturePosition { get; set; }
 
     public GameObject goalPrefab;
     public float drawGoalTime = 2f;
     public float drawGoalDelay = 2f;
     public iTween.EaseType drawGoalEaseType = iTween.EaseType.easeOutExpo;
+    public float capturePositionIconSize = 0.4f;
+    public Color capturePositionIconColor = Color.blue;
 
     PlayerMover m_player;
 
@@ -35,24 +34,24 @@ public class Board : MonoBehaviour
         m_player = Object.FindObjectOfType<PlayerMover>().GetComponent<PlayerMover>();
         GetNodeList();
 
-        m_goalNode = FindGoalNode();
+        GoalNode = FindGoalNode();
     }
 
     public void GetNodeList()
     {
         Node[] nList = Object.FindObjectsOfType<Node>();
-        m_allNodes = new List<Node>(nList);
+        AllNodes = new List<Node>(nList);
     }
 
     public Node FindNodeAt(Vector3 pos)
     {
         Vector2 boardCoord = Utility.Vector2Round(new Vector2(pos.x, pos.z));
-        return m_allNodes.Find(n => n.Coordinate == boardCoord);
+        return AllNodes.Find(n => n.Coordinate == boardCoord);
     }
 
     Node FindGoalNode()
     {
-        return m_allNodes.Find(n => n.isLevelGoal);
+        return AllNodes.Find(n => n.isLevelGoal);
     }
 
     public Node FindPlayerNode()
@@ -64,25 +63,48 @@ public class Board : MonoBehaviour
         return null;
     }
 
+    public List<EnemyManager> FindEnemiesAt(Node node)
+    {
+        List<EnemyManager> foundEnemies = new List<EnemyManager>();
+        EnemyManager[] enemies = FindObjectsOfType<EnemyManager>() as EnemyManager[];
+
+        foreach(var enemy in enemies)
+        {
+            EnemyMover mover = enemy.GetComponent<EnemyMover>();
+            if (mover.CurrentNode == node)
+            {
+                foundEnemies.Add(enemy);
+            }
+        }
+        return foundEnemies;
+    }
+
     public void UpdatePlayerNode()
     {
-        m_playerNode = FindPlayerNode();
+        PlayerNode = FindPlayerNode();
     }
 
     void OnDrawGizmos()
     {
         Gizmos.color = new Color(0f, 1f, 1f, 0.5f);
-        if (m_playerNode != null)
+        if (PlayerNode != null)
         {
-            Gizmos.DrawSphere(m_playerNode.transform.position, 0.2f);
+            Gizmos.DrawSphere(PlayerNode.transform.position, 0.2f);
+        }
+
+        Gizmos.color = capturePositionIconColor;
+
+        foreach(var capturePos in capturePositions)
+        {
+            Gizmos.DrawCube(capturePos.position, Vector3.one * capturePositionIconSize);
         }
     }
 
     public void DrawGoal()
     {
-        if (goalPrefab != null && m_goalNode != null)
+        if (goalPrefab != null && GoalNode != null)
         {
-            GameObject goalInstance = Instantiate(goalPrefab, m_goalNode.transform.position,
+            GameObject goalInstance = Instantiate(goalPrefab, GoalNode.transform.position,
                                                   Quaternion.identity);
             iTween.ScaleFrom(goalInstance, iTween.Hash(
                 "scale", Vector3.zero,
@@ -95,9 +117,9 @@ public class Board : MonoBehaviour
 
     public void InitBoard()
     {
-        if (m_playerNode != null)
+        if (PlayerNode != null)
         {
-            m_playerNode.InitNode();
+            PlayerNode.InitNode();
         }
     }
 }

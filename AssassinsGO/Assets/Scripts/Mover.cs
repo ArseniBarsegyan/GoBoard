@@ -7,6 +7,7 @@ public class Mover : MonoBehaviour
 {
     protected Board m_board;
     protected Node m_currentNode;
+    public Node CurrentNode => m_currentNode;
 
     public Vector3 destination;
     public bool faceDestination = false;
@@ -16,7 +17,7 @@ public class Mover : MonoBehaviour
     public float rotateTime = 0.5f;
     public float iTweenDelay = 0f;
 
-    public UnityEvent finishMovementEvent;
+    public UnityEvent finishMovementEvent;    
 
     protected virtual void Awake()
     {
