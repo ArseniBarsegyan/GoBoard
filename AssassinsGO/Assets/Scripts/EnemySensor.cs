@@ -7,15 +7,14 @@ public class EnemySensor : MonoBehaviour
     Node m_nodeToSearch;
     Board m_board;
 
-    bool m_foundPlayer;
-    public bool FoundPlayer => m_foundPlayer;
+    public bool FoundPlayer { get; private set; }
 
     void Awake()
     {
         m_board = FindObjectOfType<Board>().GetComponent<Board>();
     }
 
-    public void UpdateSensor()
+    public void UpdateSensor(Node enemyNode)
     {
         Vector3 worldSpacePositionToSearch = 
             transform.TransformVector(directionToSearch) 
@@ -24,16 +23,16 @@ public class EnemySensor : MonoBehaviour
         if (m_board != null)
         {
             m_nodeToSearch = m_board.FindNodeAt(worldSpacePositionToSearch);
+            if (!enemyNode.LinkedNodes.Contains(m_nodeToSearch))
+            {
+                FoundPlayer = false;
+                return;
+            }
 
             if (m_nodeToSearch == m_board.PlayerNode)
             {
-                m_foundPlayer = true;
+                FoundPlayer = true;
             }
         }
     }
-
-    //void Update()
-    //{
-    //    UpdateSensor();
-    //}
 }

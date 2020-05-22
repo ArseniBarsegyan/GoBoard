@@ -169,7 +169,7 @@ public class GameManager : MonoBehaviour
 
         foreach(var enemy in m_enemies)
         {
-            if (enemy != null)
+            if (enemy != null && !enemy.IsDead)
             {
                 enemy.IsTurnComplete = false;
                 enemy.PlayTurn();
@@ -181,7 +181,23 @@ public class GameManager : MonoBehaviour
     {
         foreach(var enemy in m_enemies)
         {
+            if (enemy.IsDead)
+            {
+                continue;
+            }
             if (!enemy.IsTurnComplete)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    bool AreEnemiesAllDead()
+    {
+        foreach(var enemy in m_enemies)
+        {
+            if (!enemy.IsDead)
             {
                 return false;
             }
@@ -193,7 +209,7 @@ public class GameManager : MonoBehaviour
     {
         if (CurrentTurn == Turn.Player && m_player != null)
         {
-            if (m_player.IsTurnComplete)
+            if (m_player.IsTurnComplete && !AreEnemiesAllDead())
             {
                 PlayEnemyTurn();
             }

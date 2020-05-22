@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using UnityEngine;
 using UnityEngine.Events;
 
 [RequireComponent(typeof(PlayerMover))]
@@ -6,6 +9,8 @@ using UnityEngine.Events;
 [RequireComponent(typeof(PlayerDeath))]
 public class PlayerManager : TurnManager
 {
+    Board m_board;
+
 	public PlayerMover playerMover;
     public PlayerInput playerInput;
 
@@ -17,8 +22,9 @@ public class PlayerManager : TurnManager
 
 		playerMover = GetComponent<PlayerMover>();
         playerInput = GetComponent<PlayerInput>();
+        m_board = FindObjectOfType<Board>().GetComponent<Board>();
 
-		playerInput.InputEnabled = true;
+        playerInput.InputEnabled = true;
     }
 
     void Update()
@@ -60,5 +66,30 @@ public class PlayerManager : TurnManager
         {
             deathEvent.Invoke();
         }
+    }
+
+    void CaptureEnemies()
+    {
+        if (m_board != null)
+        {
+            List<EnemyManager> enemies = m_board.FindEnemiesAt(m_board.PlayerNode);
+
+            if (enemies.Any())
+            {
+                foreach(var enemy in enemies)
+                {
+                    if (enemy != null)
+                    {
+                        enemy.Die();
+                    }
+                }
+            }
+        }
+    }
+
+    public override void FinishTurn()
+    {
+        CaptureEnemies();
+        base.FinishTurn();
     }
 }
